@@ -16,7 +16,7 @@
 4. Start the client `./client -l client.log -t xxxx`
     1. `-l` specifies the log output file, defaults to the controlled output.
     2. `-t` specifies the token, if not specified, the client will request the server to generate a token, which will be
-       printed out through the log,all subsequent APIs need to carry this token
+       printed out through the log,all subsequent APIs need to carry this token.
        ```log
        2022/07/03 - 12:24:53 INF token: cb0ol5du3aotti323c8g
        ```

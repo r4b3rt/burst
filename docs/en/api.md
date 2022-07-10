@@ -15,11 +15,10 @@ usefulness:
 1. used to start the client: `./client -t cb0ojodu3aotti323c80`
 2. All subsequent API requests need to bring `TOKEN`
 3. If `TOKEN` is not specified at startup, the client will request the server to generate a `TOKEN`, which will be
-   printed out through the log
+   printed out through the log,all subsequent APIs need to carry this token.
     ```raw
     2022/07/03 - 12:24:53 INF token: cb0ol5du3aotti323c8g
     ```
-   If the user calls `API` later, they will carry this `TOKEN`
 
 # Proxy
 
