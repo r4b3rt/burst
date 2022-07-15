@@ -2,3 +2,6 @@ Name: burstServer
 # the server api port
 Port: 9999
 LogLevel: debug
+AloneHttpServer:
+  Port: 12345
+  Enable: true

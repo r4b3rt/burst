@@ -3,3 +3,8 @@ Name: burstServer
 Port: 9999
 # set log level e.g: debug info warn error fatal
 LogLevel: info
+# alone http server config
+AloneHttpServer:
+  Port: 12345
+  # whether to handle the add proxy request of http type
+  Enable: true

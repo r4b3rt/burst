@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/fzdwx/burst/pkg/logx"
+	"github.com/fzdwx/burst/pkg/proxy"
 	"github.com/fzdwx/burst/server"
 	"github.com/fzdwx/burst/server/api"
 	"github.com/fzdwx/burst/server/svc"
@@ -41,11 +42,13 @@ func init() {
 
 func main() {
 
-	server := rest.MustNewServer(sConfig.RestConf)
-	defer server.Stop()
+	s := rest.MustNewServer(sConfig.RestConf)
+	defer s.Stop()
 	svcContext := svc.NewServiceContext(sConfig)
 
-	api.MountRouters(server, svcContext)
+	api.MountRouters(s, svcContext)
 
-	server.Start()
+	// start alone http server
+	go proxy.AloneHttpServer.Run(sConfig.AloneHttpServer)
+	s.Start()
 }
