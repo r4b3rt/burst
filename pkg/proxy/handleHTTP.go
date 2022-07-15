@@ -5,7 +5,9 @@ import (
 	"io"
 )
 
-var AloneHttpServer = aloneHttpServer{}
+var AloneHttpServer = aloneHttpServer{
+	enable: false,
+}
 
 type (
 	AloneHttpServerConfig struct {
@@ -14,15 +16,22 @@ type (
 	}
 
 	aloneHttpServer struct {
+		enable bool
 	}
 )
 
-func (ahs aloneHttpServer) Run(config AloneHttpServerConfig) {
-	// todo
+func (ahs *aloneHttpServer) Run(config AloneHttpServerConfig) {
+	ahs.enable = config.Enable
+	if !ahs.enable {
+		return
+	}
+
+	// todo startup alone http server
 }
 
 // handlerHttp.
 func (c *Container) handlerHttp(info *pkg.ServerProxyInfo) (error, *pkg.ClientProxyInfo, io.Closer) {
-	// todo handler http
+	// todo
+	//  1. save info to cache
 	return nil, nil, nil
 }
