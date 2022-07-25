@@ -2,12 +2,12 @@ package ws
 
 import (
 	"github.com/fzdwx/burst"
+	cache2 "github.com/fzdwx/burst/pkg/cache"
 	"github.com/fzdwx/burst/pkg/logx"
 	"github.com/fzdwx/burst/pkg/protocal"
 	"github.com/fzdwx/burst/pkg/result"
 	"github.com/fzdwx/burst/pkg/wsx"
 	"github.com/fzdwx/burst/server/api/ws/handler"
-	"github.com/fzdwx/burst/server/cache"
 	"github.com/fzdwx/burst/server/svc"
 	"net/http"
 	"time"
@@ -23,7 +23,7 @@ func Accept(svcContext *svc.ServiceContext) http.HandlerFunc {
 			return
 		}
 
-		if !cache.ProxyInfoContainer.Has(token) {
+		if !cache2.ProxyInfoContainer.Has(token) {
 			result.HttpBadRequest(w, "token is not valid")
 			return
 		}
@@ -37,7 +37,7 @@ func Accept(svcContext *svc.ServiceContext) http.HandlerFunc {
 
 		// init websocket client
 		ws := wsx.NewClassicWsx(conn)
-		cache.ServerContainer.Put(token, ws)
+		cache2.ServerContainer.Put(token, ws)
 
 		ws.MountBinaryFunc(func(bytes []byte) {
 			decode, err := protocal.Decode(bytes)
@@ -50,8 +50,8 @@ func Accept(svcContext *svc.ServiceContext) http.HandlerFunc {
 		})
 
 		ws.MountCloseFunc(func(err error) {
-			cache.ProxyInfoContainer.Remove(token)
-			cache.ServerContainer.Remove(token)
+			cache2.ProxyInfoContainer.Remove(token)
+			cache2.ServerContainer.Remove(token)
 		})
 
 		go ws.StartReading(0)

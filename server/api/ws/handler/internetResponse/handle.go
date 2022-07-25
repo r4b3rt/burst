@@ -1,9 +1,9 @@
 package internetResponse
 
 import (
+	"github.com/fzdwx/burst/pkg/cache"
 	"github.com/fzdwx/burst/pkg/logx"
 	"github.com/fzdwx/burst/pkg/protocal"
-	"github.com/fzdwx/burst/server/cache"
 )
 
 func Handle(internetResponse protocal.IntranetResponse) {

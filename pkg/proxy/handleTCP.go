@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+// handleTCP
+// each time a new port is started to handle the corresponding proxy request
 func (c *Container) handleTCP(info *pkg.ServerProxyInfo) (error, *pkg.ClientProxyInfo, io.Closer) {
 	tcp, err := net.ListenTCP(info.ChannelType, nil)
 	if err != nil {

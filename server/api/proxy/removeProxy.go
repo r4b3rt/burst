@@ -3,12 +3,12 @@ package proxy
 import (
 	"github.com/fzdwx/burst"
 	"github.com/fzdwx/burst/pkg"
+	"github.com/fzdwx/burst/pkg/cache"
 	"github.com/fzdwx/burst/pkg/logx"
 	"github.com/fzdwx/burst/pkg/model"
 	"github.com/fzdwx/burst/pkg/model/req"
 	"github.com/fzdwx/burst/pkg/protocal"
 	"github.com/fzdwx/burst/pkg/result"
-	"github.com/fzdwx/burst/server/cache"
 	"github.com/fzdwx/burst/server/svc"
 	"github.com/zeromicro/go-zero/rest/httpx"
 	"net/http"

@@ -8,6 +8,7 @@ import (
 )
 
 type (
+	// Container Binding based on the token and the user's websocket connection
 	Container struct {
 		// the websocket connection to client
 		*wsx.Wsx

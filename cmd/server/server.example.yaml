@@ -5,6 +5,11 @@ Port: 9999
 LogLevel: info
 # alone http server config
 AloneHttpServer:
+  Ip: 0.0.0.0
   Port: 39939
   # whether to handle the add proxy request of http type
   Enable: true
+  # Determine which intranet service to go to according to the router key
+  RouterKey:
+    - Host
+    - :authority

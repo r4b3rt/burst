@@ -1,8 +1,8 @@
 package user
 
 import (
+	"github.com/fzdwx/burst/pkg/cache"
 	"github.com/fzdwx/burst/pkg/result"
-	"github.com/fzdwx/burst/server/cache"
 	"github.com/fzdwx/burst/server/svc"
 	"github.com/rs/xid"
 	"net/http"

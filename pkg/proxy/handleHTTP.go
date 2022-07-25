@@ -9,19 +9,20 @@ import (
 )
 
 var AloneHttpServer = aloneHttpServer{
-	enable:  false,
 	running: false,
 }
 
 type (
 	AloneHttpServerConfig struct {
-		Port   int  `json:",default=39939"`
-		Enable bool `json:",default=true"`
+		Ip        string   `json:",default=0.0.0.0"`
+		Port      int      `json:",default=39939"`
+		Enable    bool     `json:",default=true"`
+		RouterKey []string `json:",routerKey,default=[Host,:authority]"`
 	}
 
 	aloneHttpServer struct {
-		enable  bool
 		running bool
+		cfg     AloneHttpServerConfig
 	}
 )
 
@@ -34,13 +35,14 @@ func (ahs *aloneHttpServer) Startup(config AloneHttpServerConfig) {
 
 	// update status
 	ahs.running = true
-	ahs.enable = config.Enable
-	if !ahs.enable {
+	ahs.cfg = config
+	if !ahs.cfg.Enable {
+		logx.Info().Msg("aloneHttpServer is disable")
 		return
 	}
 
 	// bind port
-	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf(":%d", config.Port))
+	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Ip, config.Port))
 	if err != nil {
 		panic(fmt.Errorf("aloneHttpServer resolve tcp adder fail:%v", err))
 	}
@@ -49,6 +51,7 @@ func (ahs *aloneHttpServer) Startup(config AloneHttpServerConfig) {
 	if err != nil {
 		panic(fmt.Errorf("aloneHttpServer bind port fail:%v", err))
 	}
+	logx.Info().Msgf("aloneHttpServer startup success,listen on %s", addr)
 
 	// accept user request.
 	for {
@@ -70,12 +73,16 @@ func (ahs *aloneHttpServer) Startup(config AloneHttpServerConfig) {
 				logx.Info().Msgf("from client get message:%s", string(bytes[:n]))
 			}
 		}()
+
+		/*
+			todo
+				1.获取 router key 对应的代理信息
+				2.根据代理信息中的ip转发到
+		*/
 	}
 }
 
 // handlerHttp.
 func (c *Container) handlerHttp(info *pkg.ServerProxyInfo) (error, *pkg.ClientProxyInfo, io.Closer) {
-	// todo
-	//  1. save info to cache
 	return nil, nil, nil
 }
