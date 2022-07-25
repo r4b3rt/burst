@@ -48,7 +48,7 @@ func main() {
 
 	api.MountRouters(s, svcContext)
 
-	// start alone http server
-	go proxy.AloneHttpServer.Run(sConfig.AloneHttpServer)
+	// startup alone http server
+	go proxy.AloneHttpServer.Startup(sConfig.AloneHttpServer)
 	s.Start()
 }

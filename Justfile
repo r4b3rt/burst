@@ -14,7 +14,7 @@ prejust:
 
 # just run s -> just run server | just run c -> just run client
 run type:
-    ./just {{ if type == "s" { "server" } else { "client" } }}
+    just {{ if type == "s" { "server" } else { "client" } }}
 
 # run server
 server:
