@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/internal/log"
 	"google.golang.org/grpc"
@@ -13,11 +12,11 @@ type client struct {
 	api.BurstClient
 }
 
-func Dial(address string, port int) (*client, error) {
+func Dial(address string) (*client, error) {
 	var opts = []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), opts...)
+	conn, err := grpc.Dial(address, opts...)
 	if err != nil {
 		slog.Error("fail to connect server", log.Reason(err))
 		return nil, err

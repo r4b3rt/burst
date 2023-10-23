@@ -6,7 +6,8 @@ service burst{
 }
 
 message ExportRequest {
-  int64 clientPort = 1;
+  int64 clientWsPort =1;
+  repeated int64 clientPort = 2;
 }
 
 message ExportResponse {

@@ -40,7 +40,7 @@ func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.E
 	if ok == false {
 		return &api.ExportResponse{}, fmt.Errorf("peer not found")
 	}
-	slog.Info("handle export", slog.Int64("clientPort", request.ClientPort), slog.String("clientAddr", p.Addr.String()))
+	slog.Info("handle export", slog.Any("clientPort", request.ClientPort), slog.String("clientAddr", p.Addr.String()))
 
 	return &api.ExportResponse{}, nil
 }
