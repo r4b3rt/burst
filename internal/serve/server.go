@@ -4,15 +4,14 @@ import (
 	context "context"
 	"fmt"
 	"github.com/fzdwx/burst/api"
-	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 	"log/slog"
 	"net"
 )
 
-func ListenAndServe(cmd *cobra.Command, args []string) error {
-	s := newServer(8000) // todo server port
+func ListenAndServe(port int) error {
+	s := newServer(port)
 	return s.ListenAndServe()
 }
 

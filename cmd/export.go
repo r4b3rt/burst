@@ -17,7 +17,7 @@ func init() {
 
 var (
 	exportCmd = &cobra.Command{
-		Use:     "export [serverAddress:port] -p [clientPort:serverPort]...",
+		Use:     "export serverAddress:port -p clientPort:serverPort ...",
 		Short:   "Export client port to server port",
 		Example: `burst export :8000 -p 8888:18888 -p 9999:19999`,
 		Args:    cobra.MinimumNArgs(1),
