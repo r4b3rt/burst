@@ -1,13 +1,12 @@
 package serve
 
 import (
-	context "context"
 	"fmt"
 	"github.com/fzdwx/burst/api"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/peer"
 	"log/slog"
 	"net"
+	"sync"
 )
 
 func ListenAndServe(port int) error {
@@ -18,7 +17,9 @@ func ListenAndServe(port int) error {
 type server struct {
 	api.BurstServer
 
-	port int
+	port           int
+	connectionLock sync.RWMutex
+	connections    []*connection
 }
 
 func newServer(port int) *server {
@@ -37,25 +38,4 @@ func (s *server) ListenAndServe() error {
 
 	slog.Info("start burst server", slog.Int("port", s.port))
 	return grpcServer.Serve(lis)
-}
-
-func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.ExportResponse, error) {
-	p, ok := peer.FromContext(ctx)
-	if ok == false {
-		return &api.ExportResponse{}, fmt.Errorf("peer not found")
-	}
-	slog.Info("handle export", slog.String("portMapping", toString(request.PortMapping)), slog.String("clientAddr", p.Addr.String()))
-
-	return &api.ExportResponse{}, nil
-}
-
-func toString(mapping []*api.PortMapping) string {
-	var str string
-	for i, m := range mapping {
-		if i != 0 {
-			str += ", "
-		}
-		str += fmt.Sprintf("%d to %d", m.ClientPort, m.ServerPort)
-	}
-	return str
 }

@@ -15,5 +15,11 @@ message ExportRequest {
   repeated PortMapping portMapping = 2;
 }
 
+message PortMappingResp {
+  PortMapping mapping = 1;
+  string error = 2;
+}
+
 message ExportResponse {
+  repeated PortMappingResp items = 1;
 }
