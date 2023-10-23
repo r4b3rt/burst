@@ -14,7 +14,7 @@ type client struct {
 }
 
 func Dial(address string, port int) (*client, error) {
-	var opts []grpc.DialOption = []grpc.DialOption{
+	var opts = []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
 	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", address, port), opts...)

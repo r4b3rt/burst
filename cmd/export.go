@@ -13,7 +13,7 @@ var (
 		Use:   "export",
 		Short: "Export client port to server port",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			c, err := client.Dial("localhost", 8000)
+			c, err := client.Dial("localhost", 8000) // todo server address
 			if err != nil {
 				return err
 			}
