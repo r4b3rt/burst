@@ -1,0 +1,15 @@
+syntax = "proto3";
+option go_package = "github.com/fzdwx/burst/api";
+
+service burst{
+  rpc Export(ExportRequest) returns (ExportResponse);
+}
+
+message ExportRequest {
+  string serverIP = 1;
+  string serverPort = 2;
+  string clientIP = 3;
+}
+
+message ExportResponse {
+}
