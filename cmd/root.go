@@ -18,6 +18,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(serveCmd)
+	rootCmd.AddCommand(exportCmd)
 }
 
 func Execute() {

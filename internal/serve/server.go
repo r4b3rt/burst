@@ -35,7 +35,8 @@ func (s *server) ListenAndServe() error {
 }
 
 func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.ExportResponse, error) {
-	return nil, nil
+	slog.Info("Export", slog.Int64("port", request.ClientPort))
+	return &api.ExportResponse{}, nil
 }
 
 func ListenAndServe(cmd *cobra.Command, args []string) error {

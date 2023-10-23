@@ -6,9 +6,7 @@ service burst{
 }
 
 message ExportRequest {
-  string serverIP = 1;
-  string serverPort = 2;
-  string clientIP = 3;
+  int64 clientPort = 1;
 }
 
 message ExportResponse {
