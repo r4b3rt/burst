@@ -5,9 +5,14 @@ service burst{
   rpc Export(ExportRequest) returns (ExportResponse);
 }
 
+message PortMapping {
+  int64 clientPort = 1;
+  int64 serverPort = 2;
+}
+
 message ExportRequest {
-  int64 clientWsPort =1;
-  repeated int64 clientPort = 2;
+  int64 clientWsPort = 1;
+  repeated PortMapping portMapping = 2;
 }
 
 message ExportResponse {

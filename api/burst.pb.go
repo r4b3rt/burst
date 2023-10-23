@@ -20,19 +20,74 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type PortMapping struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ClientPort int64 `protobuf:"varint,1,opt,name=clientPort,proto3" json:"clientPort,omitempty"`
+	ServerPort int64 `protobuf:"varint,2,opt,name=serverPort,proto3" json:"serverPort,omitempty"`
+}
+
+func (x *PortMapping) Reset() {
+	*x = PortMapping{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_burst_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PortMapping) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PortMapping) ProtoMessage() {}
+
+func (x *PortMapping) ProtoReflect() protoreflect.Message {
+	mi := &file_api_burst_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PortMapping.ProtoReflect.Descriptor instead.
+func (*PortMapping) Descriptor() ([]byte, []int) {
+	return file_api_burst_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *PortMapping) GetClientPort() int64 {
+	if x != nil {
+		return x.ClientPort
+	}
+	return 0
+}
+
+func (x *PortMapping) GetServerPort() int64 {
+	if x != nil {
+		return x.ServerPort
+	}
+	return 0
+}
+
 type ExportRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ClientWsPort int64   `protobuf:"varint,1,opt,name=clientWsPort,proto3" json:"clientWsPort,omitempty"`
-	ClientPort   []int64 `protobuf:"varint,2,rep,packed,name=clientPort,proto3" json:"clientPort,omitempty"`
+	ClientWsPort int64          `protobuf:"varint,1,opt,name=clientWsPort,proto3" json:"clientWsPort,omitempty"`
+	PortMapping  []*PortMapping `protobuf:"bytes,2,rep,name=portMapping,proto3" json:"portMapping,omitempty"`
 }
 
 func (x *ExportRequest) Reset() {
 	*x = ExportRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_burst_proto_msgTypes[0]
+		mi := &file_api_burst_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -45,7 +100,7 @@ func (x *ExportRequest) String() string {
 func (*ExportRequest) ProtoMessage() {}
 
 func (x *ExportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_burst_proto_msgTypes[0]
+	mi := &file_api_burst_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +113,7 @@ func (x *ExportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportRequest.ProtoReflect.Descriptor instead.
 func (*ExportRequest) Descriptor() ([]byte, []int) {
-	return file_api_burst_proto_rawDescGZIP(), []int{0}
+	return file_api_burst_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *ExportRequest) GetClientWsPort() int64 {
@@ -68,9 +123,9 @@ func (x *ExportRequest) GetClientWsPort() int64 {
 	return 0
 }
 
-func (x *ExportRequest) GetClientPort() []int64 {
+func (x *ExportRequest) GetPortMapping() []*PortMapping {
 	if x != nil {
-		return x.ClientPort
+		return x.PortMapping
 	}
 	return nil
 }
@@ -84,7 +139,7 @@ type ExportResponse struct {
 func (x *ExportResponse) Reset() {
 	*x = ExportResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_burst_proto_msgTypes[1]
+		mi := &file_api_burst_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -97,7 +152,7 @@ func (x *ExportResponse) String() string {
 func (*ExportResponse) ProtoMessage() {}
 
 func (x *ExportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_burst_proto_msgTypes[1]
+	mi := &file_api_burst_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -110,26 +165,32 @@ func (x *ExportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExportResponse.ProtoReflect.Descriptor instead.
 func (*ExportResponse) Descriptor() ([]byte, []int) {
-	return file_api_burst_proto_rawDescGZIP(), []int{1}
+	return file_api_burst_proto_rawDescGZIP(), []int{2}
 }
 
 var File_api_burst_proto protoreflect.FileDescriptor
 
 var file_api_burst_proto_rawDesc = []byte{
 	0x0a, 0x0f, 0x61, 0x70, 0x69, 0x2f, 0x62, 0x75, 0x72, 0x73, 0x74, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x22, 0x53, 0x0a, 0x0d, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x12, 0x22, 0x0a, 0x0c, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x57, 0x73, 0x50, 0x6f,
-	0x72, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0c, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74,
-	0x57, 0x73, 0x50, 0x6f, 0x72, 0x74, 0x12, 0x1e, 0x0a, 0x0a, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74,
-	0x50, 0x6f, 0x72, 0x74, 0x18, 0x02, 0x20, 0x03, 0x28, 0x03, 0x52, 0x0a, 0x63, 0x6c, 0x69, 0x65,
-	0x6e, 0x74, 0x50, 0x6f, 0x72, 0x74, 0x22, 0x10, 0x0a, 0x0e, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x32, 0x0a, 0x05, 0x62, 0x75, 0x72, 0x73,
-	0x74, 0x12, 0x29, 0x0a, 0x06, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x0e, 0x2e, 0x45, 0x78,
-	0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x45, 0x78,
-	0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1c, 0x5a, 0x1a,
-	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x66, 0x7a, 0x64, 0x77, 0x78,
-	0x2f, 0x62, 0x75, 0x72, 0x73, 0x74, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x33,
+	0x6f, 0x22, 0x4d, 0x0a, 0x0b, 0x50, 0x6f, 0x72, 0x74, 0x4d, 0x61, 0x70, 0x70, 0x69, 0x6e, 0x67,
+	0x12, 0x1e, 0x0a, 0x0a, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x50, 0x6f, 0x72, 0x74, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x50, 0x6f, 0x72, 0x74,
+	0x12, 0x1e, 0x0a, 0x0a, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x50, 0x6f, 0x72, 0x74, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x50, 0x6f, 0x72, 0x74,
+	0x22, 0x63, 0x0a, 0x0d, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x12, 0x22, 0x0a, 0x0c, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x57, 0x73, 0x50, 0x6f, 0x72,
+	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0c, 0x63, 0x6c, 0x69, 0x65, 0x6e, 0x74, 0x57,
+	0x73, 0x50, 0x6f, 0x72, 0x74, 0x12, 0x2e, 0x0a, 0x0b, 0x70, 0x6f, 0x72, 0x74, 0x4d, 0x61, 0x70,
+	0x70, 0x69, 0x6e, 0x67, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0c, 0x2e, 0x50, 0x6f, 0x72,
+	0x74, 0x4d, 0x61, 0x70, 0x70, 0x69, 0x6e, 0x67, 0x52, 0x0b, 0x70, 0x6f, 0x72, 0x74, 0x4d, 0x61,
+	0x70, 0x70, 0x69, 0x6e, 0x67, 0x22, 0x10, 0x0a, 0x0e, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32, 0x32, 0x0a, 0x05, 0x62, 0x75, 0x72, 0x73, 0x74,
+	0x12, 0x29, 0x0a, 0x06, 0x45, 0x78, 0x70, 0x6f, 0x72, 0x74, 0x12, 0x0e, 0x2e, 0x45, 0x78, 0x70,
+	0x6f, 0x72, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x45, 0x78, 0x70,
+	0x6f, 0x72, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x1c, 0x5a, 0x1a, 0x67,
+	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x66, 0x7a, 0x64, 0x77, 0x78, 0x2f,
+	0x62, 0x75, 0x72, 0x73, 0x74, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0x33,
 }
 
 var (
@@ -144,19 +205,21 @@ func file_api_burst_proto_rawDescGZIP() []byte {
 	return file_api_burst_proto_rawDescData
 }
 
-var file_api_burst_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_api_burst_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_api_burst_proto_goTypes = []interface{}{
-	(*ExportRequest)(nil),  // 0: ExportRequest
-	(*ExportResponse)(nil), // 1: ExportResponse
+	(*PortMapping)(nil),    // 0: PortMapping
+	(*ExportRequest)(nil),  // 1: ExportRequest
+	(*ExportResponse)(nil), // 2: ExportResponse
 }
 var file_api_burst_proto_depIdxs = []int32{
-	0, // 0: burst.Export:input_type -> ExportRequest
-	1, // 1: burst.Export:output_type -> ExportResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: ExportRequest.portMapping:type_name -> PortMapping
+	1, // 1: burst.Export:input_type -> ExportRequest
+	2, // 2: burst.Export:output_type -> ExportResponse
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_api_burst_proto_init() }
@@ -166,7 +229,7 @@ func file_api_burst_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_api_burst_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExportRequest); i {
+			switch v := v.(*PortMapping); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -178,6 +241,18 @@ func file_api_burst_proto_init() {
 			}
 		}
 		file_api_burst_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ExportRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_burst_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ExportResponse); i {
 			case 0:
 				return &v.state
@@ -196,7 +271,7 @@ func file_api_burst_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_burst_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

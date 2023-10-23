@@ -11,6 +11,11 @@ import (
 	"net"
 )
 
+func ListenAndServe(cmd *cobra.Command, args []string) error {
+	s := newServer(8000) // todo server port
+	return s.ListenAndServe()
+}
+
 type server struct {
 	api.BurstServer
 
@@ -40,12 +45,18 @@ func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.E
 	if ok == false {
 		return &api.ExportResponse{}, fmt.Errorf("peer not found")
 	}
-	slog.Info("handle export", slog.Any("clientPort", request.ClientPort), slog.String("clientAddr", p.Addr.String()))
+	slog.Info("handle export", slog.String("portMapping", toString(request.PortMapping)), slog.String("clientAddr", p.Addr.String()))
 
 	return &api.ExportResponse{}, nil
 }
 
-func ListenAndServe(cmd *cobra.Command, args []string) error {
-	s := newServer(8000) // todo server port
-	return s.ListenAndServe()
+func toString(mapping []*api.PortMapping) string {
+	var str string
+	for i, m := range mapping {
+		if i != 0 {
+			str += ", "
+		}
+		str += fmt.Sprintf("%d to %d", m.ClientPort, m.ServerPort)
+	}
+	return str
 }
