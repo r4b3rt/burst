@@ -27,6 +27,14 @@ func ServerReadFromUser() slog.Attr {
 	return slog.String("direction", "server <- user")
 }
 
+func ServerReadFromClient() slog.Attr {
+	return slog.String("direction", "server <- client")
+}
+
+func ServerSendToUser() slog.Attr {
+	return slog.String("direction", "server -> user")
+}
+
 func ServerToClient() slog.Attr {
 	return slog.String("direction", "server -> client")
 }

@@ -39,6 +39,13 @@ func (c *connection) addUserConn(conn net.Conn) *userConnection {
 	return userConn
 }
 
+func (c *connection) getUserConn(id string) *userConnection {
+	c.userConnectionsLock.RLock()
+	defer c.userConnectionsLock.RUnlock()
+
+	return c.userConnections[id]
+}
+
 func (s *server) addConnection(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) *connection {
 	s.connectionLock.Lock()
 	defer s.connectionLock.Unlock()

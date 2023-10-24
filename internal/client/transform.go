@@ -73,6 +73,7 @@ func localToServer(userConn *connection, serverStream api.Burst_TransformClient)
 	buf := make([]byte, 1024)
 
 	for {
+		// 5. read local data
 		n, err := reader.Read(buf)
 		if err != nil {
 			slog.Error("read local data, local to server stop",
@@ -83,6 +84,8 @@ func localToServer(userConn *connection, serverStream api.Burst_TransformClient)
 				log.ClientReadFromLocal())
 			return
 		}
+
+		// 6. send to server
 		if err = serverStream.Send(&api.TransFromData{
 			ConnectionId:     userConn.connectionId,
 			UserConnectionId: userConn.userId,

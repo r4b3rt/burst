@@ -39,14 +39,41 @@ func (s *server) Transform(ts api.Burst_TransformServer) error {
 	}()
 
 	for {
-		var v = &api.TransFromData{}
-		err = ts.RecvMsg(v)
+		// 7. read data from client stream
+		ndata, err := ts.Recv()
 		if err != nil {
-			fmt.Println(err)
+			slog.Error("read data error, stop transform",
+				log.ConnectionId(conn.id),
+				log.UserConnectionId(data.UserConnectionId),
+				log.Reason(err),
+				log.ServerReadFromClient())
 			return err
 		}
 
-		fmt.Println(v)
+		// 8. send to user conn
+		userConn := conn.getUserConn(ndata.UserConnectionId)
+		if userConn == nil {
+			slog.Error("user conn not found, stop transform",
+				log.ConnectionId(conn.id),
+				log.UserConnectionId(data.UserConnectionId),
+				log.Reason(err),
+				log.ServerReadFromClient())
+			return fmt.Errorf("user conn %s not found", ndata.UserConnectionId)
+		}
+
+		if _, err = userConn.conn.Write(ndata.Data); err != nil {
+			slog.Error("write data error, stop transform",
+				log.ConnectionId(conn.id),
+				log.UserConnectionId(data.UserConnectionId),
+				log.Reason(err),
+				log.ServerReadFromClient())
+			return err
+		}
+
+		slog.Info("transform data success",
+			log.ConnectionId(conn.id),
+			log.UserConnectionId(data.UserConnectionId),
+			log.ServerSendToUser())
 	}
 }
 
