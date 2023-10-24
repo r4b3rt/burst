@@ -4,6 +4,7 @@ import (
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/util/id"
 	"net"
+	"sync"
 )
 
 type connection struct {
@@ -12,23 +13,30 @@ type connection struct {
 
 	serverSideConn net.Listener
 	mapping        *api.PortMapping
+
+	userConnections     map[string]*userConnection
+	userConnectionsLock sync.RWMutex
 }
 
-func (s *server) react(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) string {
-	c := s.addConnection(peer, m, serverSideConn)
+type userConnection struct {
+	id                 string
+	clientConnectionId string
+	conn               net.Conn
+}
 
-	switch serverSideConn.(type) {
-	case *net.TCPListener:
-		s.reactTCP(peer, m, serverSideConn.(*net.TCPListener))
+func (c *connection) addUserConn(conn net.Conn) *userConnection {
+	c.userConnectionsLock.Lock()
+	defer c.userConnectionsLock.Unlock()
+
+	var userConn = &userConnection{
+		id:                 id.Next(),
+		clientConnectionId: c.id,
+		conn:               conn,
 	}
 
-	return c.id
-}
+	c.userConnections[userConn.id] = userConn
 
-func (s *server) reactTCP(peer net.Addr, m *api.PortMapping, conn *net.TCPListener) {
-	m.ServerPort = int64(conn.Addr().(*net.TCPAddr).Port)
-
-	// todo react
+	return userConn
 }
 
 func (s *server) addConnection(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) *connection {

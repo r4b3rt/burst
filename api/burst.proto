@@ -30,4 +30,6 @@ message ExportResponse {
 
 message TransFromData{
   string connectionId = 1;
+  string userConnectionId = 2;
+  bytes data = 3;
 }

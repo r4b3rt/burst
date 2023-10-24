@@ -14,7 +14,15 @@ func ConnectionId(id string) slog.Attr {
 	return slog.String("connectionId", id)
 }
 
+func UserConnectionId(id string) slog.Attr {
+	return slog.String("userConnectionId", id)
+}
+
 func Mapping(m *api.PortMapping) slog.Attr {
 	portMappingStr := fmt.Sprintf("%d to %d", m.ClientPort, m.ServerPort)
 	return slog.String("port mapping", portMappingStr)
+}
+
+func UserToClient() slog.Attr {
+	return slog.String("direction", "user -> client")
 }
