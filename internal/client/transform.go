@@ -57,12 +57,12 @@ func (t *t) OnMessage(socket *gws.Conn, message *gws.Message) {
 	switch message.Opcode {
 	case gws.OpcodeBinary:
 		slog.Info("recv data from server",
+			log.ClientReadFromServer(),
 			log.ConnectionId(t.item.ConnectionId),
 			log.Mapping(t.item.Mapping),
-			log.ClientReadFromServer())
+		)
 
 		data := jsonutil.Decode(message.Data)
-
 		userConn, err := t.cm.getConnection(data.UserConnectionId, t.item.Mapping)
 		if err != nil {
 			slog.Error("get connection error",
@@ -81,13 +81,20 @@ func (t *t) OnMessage(socket *gws.Conn, message *gws.Message) {
 		_, err = userConn.conn.Write(data.Data)
 		if err != nil {
 			slog.Error("write data to user error",
+				log.ClientToLocal(),
 				log.ConnectionId(t.item.ConnectionId),
 				log.Mapping(t.item.Mapping),
 				log.UserConnectionId(data.UserConnectionId),
 				log.Reason(err),
-				log.ClientToLocal())
+			)
 			return
 		}
+		slog.Info("send data to user success",
+			log.ClientToLocal(),
+			log.ConnectionId(t.item.ConnectionId),
+			log.Mapping(t.item.Mapping),
+			log.UserConnectionId(data.UserConnectionId))
+
 	}
 }
 
@@ -96,15 +103,24 @@ func localToServer(userConn *connection, serverStream *gws.Conn) {
 	for {
 		// 5. read local data
 		n, err := userConn.conn.Read(buf)
-		if err != nil {
+		if err != nil && err.Error() != "EOF" {
 			slog.Error("read local data, local to server stop",
+				log.ClientReadFromLocal(),
 				log.ConnectionId(userConn.connectionId),
 				log.Mapping(userConn.mapping),
 				log.UserConnectionId(userConn.userId),
 				log.Reason(err),
-				log.ClientReadFromLocal())
+			)
 			return
 		}
+		if n == 0 {
+			continue
+		}
+		slog.Info("read local data success",
+			log.ClientReadFromLocal(),
+			log.ConnectionId(userConn.connectionId),
+			log.Mapping(userConn.mapping),
+			log.UserConnectionId(userConn.userId))
 
 		// 6. send to server
 		if err = serverStream.WriteMessage(gws.OpcodeBinary, jsonutil.Encode(&api.TransFromData{
@@ -113,12 +129,18 @@ func localToServer(userConn *connection, serverStream *gws.Conn) {
 			Data:             buf[:n],
 		})); err != nil {
 			slog.Error("send data to server error",
+				log.ClientToServer(),
 				log.ConnectionId(userConn.connectionId),
 				log.Mapping(userConn.mapping),
 				log.UserConnectionId(userConn.userId),
 				log.Reason(err),
-				log.ClientToServer())
+			)
 			return
 		}
+		slog.Info("send data to server success",
+			log.ClientToServer(),
+			log.ConnectionId(userConn.connectionId),
+			log.Mapping(userConn.mapping),
+			log.UserConnectionId(userConn.userId))
 	}
 }

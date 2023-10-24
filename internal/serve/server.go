@@ -1,13 +1,10 @@
 package serve
 
 import (
-	"fmt"
 	"github.com/fzdwx/burst/api"
+	"github.com/gin-gonic/gin"
 	"github.com/lxzan/gws"
-	"google.golang.org/grpc"
-	"log"
-	"log/slog"
-	"net"
+	"strconv"
 	"sync"
 )
 
@@ -17,8 +14,6 @@ func ListenAndServe(port int) error {
 }
 
 type server struct {
-	api.BurstServer
-
 	port           int
 	connectionLock sync.RWMutex
 	connections    map[string]*connection
@@ -33,36 +28,42 @@ func newServer(port int) *server {
 }
 
 func (s *server) ListenAndServe() error {
-	lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", s.port))
-	if err != nil {
-		return err
-	}
+	upgrader := gws.NewUpgrader(s.e(), &gws.ServerOption{
+		ReadAsyncEnabled: true,
+		CompressEnabled:  true,
+		Recovery:         gws.Recovery,
+	})
 
-	var opts []grpc.ServerOption
-	grpcServer := grpc.NewServer(opts...)
-	api.RegisterBurstServer(grpcServer, s)
-
-	slog.Info("start burst server", slog.Int("port", s.port))
-
-	ws := gws.NewServer(s.e())
-	listener, err := net.Listen("tcp", ":0")
-	if err != nil {
-		return err
-	}
-	go func() {
-		s.wsPort = int64(listener.Addr().(*net.TCPAddr).Port)
-		err = ws.RunListener(listener)
+	engine := gin.New()
+	engine.GET("/ws", func(context *gin.Context) {
+		socket, err := upgrader.Upgrade(context.Writer, context.Request)
 		if err != nil {
-			log.Fatal(err)
 			return
 		}
-	}()
+		go func() {
+			// Blocking prevents the context from being GC.
+			socket.ReadLoop()
+		}()
+	})
 
-	return grpcServer.Serve(lis)
+	engine.POST("/export", func(context *gin.Context) {
+		var req *api.ExportRequest
+		if err := context.ShouldBindJSON(req); err != nil {
+			context.JSON(400, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		resp := s.Export(context, req)
+		context.JSON(200, resp)
+	})
+
+	return engine.Run(":" + strconv.Itoa(s.port))
 }
 
-func (s *server) e() (gws.Event, *gws.ServerOption) {
+func (s *server) e() gws.Event {
 	return &q{
 		s: s,
-	}, nil
+	}
 }

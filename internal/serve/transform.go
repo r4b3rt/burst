@@ -29,23 +29,25 @@ func (q *q) OnPong(socket *gws.Conn, payload []byte) {
 func (q *q) OnMessage(socket *gws.Conn, message *gws.Message) {
 	switch message.Opcode {
 	case gws.OpcodeText:
-		data := jsonutil.Decode(message.Data)
-		conn := q.s.getConnection(data.ConnectionId)
-		for {
-			// accept user connect
-			c, err := conn.serverSideConn.Accept()
-			if err != nil {
-				slog.Error("accept error, stop accept user connect",
-					log.ConnectionId(conn.id),
-					log.Mapping(conn.mapping),
-					log.Reason(err))
-				return
-			}
+		go func() {
+			data := jsonutil.Decode(message.Data)
+			conn := q.s.getConnection(data.ConnectionId)
+			for {
+				// accept user connect
+				c, err := conn.serverSideConn.Accept()
+				if err != nil {
+					slog.Error("accept error, stop accept user connect",
+						log.ConnectionId(conn.id),
+						log.Mapping(conn.mapping),
+						log.Reason(err))
+					return
+				}
 
-			userConn := conn.addUserConn(c)
-			slog.Info("accept user connect success", log.ConnectionId(conn.id), log.UserConnectionId(userConn.id))
-			go q.s.transformUserToClient(userConn, socket)
-		}
+				userConn := conn.addUserConn(c)
+				slog.Info("accept user connect success", log.ConnectionId(conn.id), log.UserConnectionId(userConn.id))
+				go q.s.transformUserToClient(userConn, socket)
+			}
+		}()
 	case gws.OpcodeBinary:
 		data := jsonutil.Decode(message.Data)
 		conn := q.s.getConnection(data.ConnectionId)
@@ -57,17 +59,19 @@ func (q *q) OnMessage(socket *gws.Conn, message *gws.Message) {
 		userConn := conn.getUserConn(data.UserConnectionId)
 		if _, err := userConn.conn.Write(data.Data); err != nil {
 			slog.Error("write data error, stop transform",
+				log.ServerReadFromClient(),
 				log.ConnectionId(conn.id),
 				log.UserConnectionId(data.UserConnectionId),
 				log.Reason(err),
-				log.ServerReadFromClient())
+			)
 			return
 		}
 
 		slog.Info("transform data success",
+			log.ServerSendToUser(),
 			log.ConnectionId(conn.id),
 			log.UserConnectionId(data.UserConnectionId),
-			log.ServerSendToUser())
+		)
 	}
 }
 
@@ -76,7 +80,7 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream *g
 	for {
 		// 1. read user conn data
 		n, err := userConn.conn.Read(buf)
-		if err != nil {
+		if err != nil && err.Error() != "EOF" {
 			slog.Error("read user data, user to client stop",
 				log.ServerReadFromUser(),
 				log.ConnectionId(userConn.clientConnectionId),
@@ -84,6 +88,14 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream *g
 				log.Reason(err))
 			return
 		}
+		if n == 0 {
+			continue
+		}
+
+		slog.Info("read user data success",
+			log.ServerReadFromUser(),
+			log.ConnectionId(userConn.clientConnectionId),
+			log.UserConnectionId(userConn.id))
 
 		// 2. send data to client stream
 		if err = clientStream.WriteMessage(gws.OpcodeBinary, jsonutil.Encode(&api.TransFromData{
@@ -98,5 +110,10 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream *g
 				log.Reason(err))
 			return
 		}
+
+		slog.Info("transform data success",
+			log.ServerToClient(),
+			log.ConnectionId(userConn.clientConnectionId),
+			log.UserConnectionId(userConn.id))
 	}
 }

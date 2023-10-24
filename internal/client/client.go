@@ -1,29 +1,37 @@
 package client
 
 import (
+	"bytes"
 	"github.com/fzdwx/burst/api"
-	"github.com/fzdwx/burst/util/log"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-	"log/slog"
+	"github.com/fzdwx/burst/util/jsonutil"
+	"io"
+	"net/http"
+	"strings"
 )
 
 type client struct {
-	api.BurstClient
+	url string
 }
 
-func Dial(address string) (*client, error) {
-	var opts = []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	}
-	conn, err := grpc.Dial(address, opts...)
+func (c client) Export(a *api.ExportRequest) (*api.ExportResponse, error) {
+	resp, err := http.Post(c.url, "application/json", strings.NewReader(string(jsonutil.Encode(a))))
 	if err != nil {
-		slog.Error("fail to connect server", log.Reason(err))
 		return nil, err
 	}
 
-	c := &client{}
+	b, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return jsonutil.Decode2(bytes.NewBuffer(b)), nil
+}
 
-	c.BurstClient = api.NewBurstClient(conn)
+func New(address string) (*client, error) {
+	url := address
+	if strings.HasPrefix(address, ":") {
+		url = "http://localhost" + address
+	}
+
+	c := &client{url}
 	return c, nil
 }

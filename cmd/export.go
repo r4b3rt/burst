@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/fzdwx/burst/api"
@@ -27,7 +26,7 @@ var (
 		Example: `burst export :8000 -p 8888:18888 -p 9999:19999`,
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			c, err := client.Dial(args[0])
+			c, err := client.New(args[0])
 			if err != nil {
 				log2.Fatal(err)
 			}
@@ -37,7 +36,7 @@ var (
 				log2.Fatal(err)
 			}
 
-			resp, err := c.Export(context.Background(), &api.ExportRequest{
+			resp, err := c.Export(&api.ExportRequest{
 				PortMapping: mapping,
 			})
 			if err != nil {

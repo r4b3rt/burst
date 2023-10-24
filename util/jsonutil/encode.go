@@ -16,3 +16,9 @@ func Decode(buf *bytes.Buffer) *api.TransFromData {
 	_ = json.NewDecoder(buf).Decode(v)
 	return v
 }
+
+func Decode2(buf *bytes.Buffer) *api.ExportResponse {
+	var v = &api.ExportResponse{}
+	_ = json.NewDecoder(buf).Decode(v)
+	return v
+}

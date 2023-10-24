@@ -8,8 +8,7 @@ import (
 )
 
 type connection struct {
-	peer net.Addr
-	id   string
+	id string
 
 	serverSideConn net.Listener
 	mapping        *api.PortMapping
@@ -46,12 +45,11 @@ func (c *connection) getUserConn(id string) *userConnection {
 	return c.userConnections[id]
 }
 
-func (s *server) addConnection(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) *connection {
+func (s *server) addConnection(m *api.PortMapping, serverSideConn net.Listener) *connection {
 	s.connectionLock.Lock()
 	defer s.connectionLock.Unlock()
 
 	c := &connection{
-		peer:            peer,
 		id:              id.Next(),
 		serverSideConn:  serverSideConn,
 		mapping:         m,

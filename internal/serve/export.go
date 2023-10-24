@@ -1,22 +1,17 @@
 package serve
 
 import (
-	"context"
 	"fmt"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/util/log"
-	"google.golang.org/grpc/peer"
+	"github.com/gin-gonic/gin"
 	"log/slog"
 )
 
-func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.ExportResponse, error) {
-	p, ok := peer.FromContext(ctx)
-	if ok == false {
-		return &api.ExportResponse{}, fmt.Errorf("peer not found")
-	}
+func (s *server) Export(ctx *gin.Context, request *api.ExportRequest) (*api.ExportResponse, error) {
 	slog.Info("handle export",
 		slog.String("portMapping", toString(request.PortMapping)),
-		slog.String("clientAddr", p.Addr.String()),
+		slog.String("clientAddr", ctx.RemoteIP()),
 	)
 
 	var (
@@ -28,7 +23,7 @@ func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.E
 
 	for i := range request.PortMapping {
 		mapping := request.PortMapping[i]
-		connectionId, err := s.mapping(p.Addr, mapping)
+		connectionId, err := s.mapping(mapping)
 		if err != nil {
 			slog.ErrorContext(ctx, "mapping error", log.Mapping(mapping), log.Reason(err))
 		}
