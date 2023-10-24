@@ -68,3 +68,9 @@ func (cm *connectionManager) getConnection(userId string, m *api.PortMapping) (*
 
 	return newConn, nil
 }
+
+func (cm *connectionManager) removeConnection(id string) {
+	cm.connectionPoolLock.Lock()
+	delete(cm.connectionPool, id)
+	cm.connectionPoolLock.Unlock()
+}

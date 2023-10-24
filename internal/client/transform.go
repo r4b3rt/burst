@@ -76,7 +76,7 @@ func (t *t) OnMessage(socket *gws.Conn, message *gws.Message) {
 		}
 		if userConn.startRead.Load() == false {
 			userConn.startRead.Store(true)
-			go localToServer(userConn, socket)
+			go t.localToServer(userConn, socket)
 		}
 
 		// 4. send user data to src port
@@ -99,8 +99,9 @@ func (t *t) OnMessage(socket *gws.Conn, message *gws.Message) {
 	}
 }
 
-func localToServer(userConn *connection, serverStream *gws.Conn) {
+func (t *t) localToServer(userConn *connection, serverStream *gws.Conn) {
 	buf := make([]byte, 1024)
+	defer t.cm.removeConnection(userConn.userId)
 	for {
 		// 5. read local data
 		n, err := userConn.conn.Read(buf)

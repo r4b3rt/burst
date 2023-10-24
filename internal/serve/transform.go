@@ -40,6 +40,7 @@ func (q *q) OnMessage(socket *gws.Conn, message *gws.Message) {
 
 		userConn := conn.getUserConn(data.UserConnectionId)
 		if _, err := userConn.conn.Write(data.Data); err != nil {
+			conn.removeUserConn(data.UserConnectionId)
 			slog.Error("write data error",
 				log.ServerSendToUser(),
 				log.ConnectionId(conn.id),

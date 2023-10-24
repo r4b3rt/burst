@@ -45,6 +45,13 @@ func (c *connection) getUserConn(id string) *userConnection {
 	return c.userConnections[id]
 }
 
+func (c *connection) removeUserConn(connectionId string) {
+	c.userConnectionsLock.Lock()
+	defer c.userConnectionsLock.Unlock()
+
+	delete(c.userConnections, connectionId)
+}
+
 func (s *server) addConnection(m *api.PortMapping, serverSideConn net.Listener) *connection {
 	s.connectionLock.Lock()
 	defer s.connectionLock.Unlock()
