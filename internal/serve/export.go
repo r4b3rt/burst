@@ -21,7 +21,8 @@ func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.E
 
 	var (
 		resp = &api.ExportResponse{
-			Items: make([]*api.PortMappingResp, 0),
+			Items:        make([]*api.PortMappingResp, 0),
+			ServerWsPort: s.wsPort,
 		}
 	)
 

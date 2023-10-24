@@ -7,6 +7,7 @@ import (
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/internal/client"
 	"github.com/fzdwx/burst/util/log"
+	"github.com/lxzan/gws"
 	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	log2 "log"
@@ -60,12 +61,21 @@ var (
 				log2.Fatal(fmt.Errorf("not port mapping success"))
 			}
 
+			serverAddressPairs := strings.Split(args[0], ":")
+			address := "localhost"
+			if len(serverAddressPairs[0]) > 0 {
+				address = serverAddressPairs[0]
+			}
+			addr := fmt.Sprintf("ws://%s:%d", address, resp.ServerWsPort)
 			lo.ForEach(successMapping, func(item *api.PortMappingResp, index int) {
-				transformClient, err := c.Transform(context.Background())
+				ws, _, err := gws.NewClient(client.NewTransform(item), &gws.ClientOption{
+					Addr: addr,
+				})
 				if err != nil {
 					log2.Fatal(err)
 				}
-				go client.Transform(transformClient, item)
+				go ws.ReadLoop()
+				slog.Info("client connection server ws", log.Mapping(item.Mapping))
 			})
 
 			select {}

@@ -26,6 +26,7 @@ message PortMappingResp {
 
 message ExportResponse {
   repeated PortMappingResp items = 1;
+  int64 serverWsPort = 2;
 }
 
 message TransFromData{

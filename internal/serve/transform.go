@@ -1,26 +1,36 @@
 package serve
 
 import (
-	"bufio"
-	"fmt"
 	"github.com/fzdwx/burst/api"
+	"github.com/fzdwx/burst/util/jsonutil"
 	"github.com/fzdwx/burst/util/log"
+	"github.com/lxzan/gws"
 	"log/slog"
 )
 
-func (s *server) Transform(ts api.Burst_TransformServer) error {
-	data, err := ts.Recv()
-	if err != nil {
-		return err
-	}
+type q struct {
+	s *server
+}
 
-	conn := s.getConnection(data.ConnectionId)
-	if conn == nil {
-		slog.Error("connection not found", log.ConnectionId(data.ConnectionId))
-		return fmt.Errorf("connection %s not found", data.ConnectionId)
-	}
+func (q *q) OnOpen(socket *gws.Conn) {
+}
 
-	go func() {
+func (q *q) OnClose(socket *gws.Conn, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (q *q) OnPing(socket *gws.Conn, payload []byte) {
+}
+
+func (q *q) OnPong(socket *gws.Conn, payload []byte) {
+}
+
+func (q *q) OnMessage(socket *gws.Conn, message *gws.Message) {
+	switch message.Opcode {
+	case gws.OpcodeText:
+		data := jsonutil.Decode(message.Data)
+		conn := q.s.getConnection(data.ConnectionId)
 		for {
 			// accept user connect
 			c, err := conn.serverSideConn.Accept()
@@ -34,40 +44,24 @@ func (s *server) Transform(ts api.Burst_TransformServer) error {
 
 			userConn := conn.addUserConn(c)
 			slog.Info("accept user connect success", log.ConnectionId(conn.id), log.UserConnectionId(userConn.id))
-			go s.transformUserToClient(userConn, ts)
+			go q.s.transformUserToClient(userConn, socket)
 		}
-	}()
-
-	for {
-		// 7. read data from client stream
-		ndata, err := ts.Recv()
-		if err != nil {
-			slog.Error("read data error, stop transform",
-				log.ConnectionId(conn.id),
-				log.UserConnectionId(data.UserConnectionId),
-				log.Reason(err),
-				log.ServerReadFromClient())
-			return err
+	case gws.OpcodeBinary:
+		data := jsonutil.Decode(message.Data)
+		conn := q.s.getConnection(data.ConnectionId)
+		if conn == nil {
+			slog.Error("connection not found", log.ConnectionId(data.ConnectionId))
+			return
 		}
 
-		// 8. send to user conn
-		userConn := conn.getUserConn(ndata.UserConnectionId)
-		if userConn == nil {
-			slog.Error("user conn not found, stop transform",
-				log.ConnectionId(conn.id),
-				log.UserConnectionId(data.UserConnectionId),
-				log.Reason(err),
-				log.ServerReadFromClient())
-			return fmt.Errorf("user conn %s not found", ndata.UserConnectionId)
-		}
-
-		if _, err = userConn.conn.Write(ndata.Data); err != nil {
+		userConn := conn.getUserConn(data.UserConnectionId)
+		if _, err := userConn.conn.Write(data.Data); err != nil {
 			slog.Error("write data error, stop transform",
 				log.ConnectionId(conn.id),
 				log.UserConnectionId(data.UserConnectionId),
 				log.Reason(err),
 				log.ServerReadFromClient())
-			return err
+			return
 		}
 
 		slog.Info("transform data success",
@@ -77,12 +71,11 @@ func (s *server) Transform(ts api.Burst_TransformServer) error {
 	}
 }
 
-func (s *server) transformUserToClient(userConn *userConnection, clientStream api.Burst_TransformServer) {
-	r := bufio.NewReader(userConn.conn)
+func (s *server) transformUserToClient(userConn *userConnection, clientStream *gws.Conn) {
 	buf := make([]byte, 1024)
 	for {
 		// 1. read user conn data
-		n, err := r.Read(buf)
+		n, err := userConn.conn.Read(buf)
 		if err != nil {
 			slog.Error("read user data, user to client stop",
 				log.ServerReadFromUser(),
@@ -93,11 +86,11 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream ap
 		}
 
 		// 2. send data to client stream
-		if err = clientStream.Send(&api.TransFromData{
+		if err = clientStream.WriteMessage(gws.OpcodeBinary, jsonutil.Encode(&api.TransFromData{
 			ConnectionId:     userConn.clientConnectionId,
 			UserConnectionId: userConn.id,
 			Data:             buf[:n],
-		}); err != nil {
+		})); err != nil {
 			slog.Error("send data error, user to client stop",
 				log.ServerToClient(),
 				log.ConnectionId(userConn.clientConnectionId),
