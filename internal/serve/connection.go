@@ -44,10 +44,11 @@ func (s *server) addConnection(peer net.Addr, m *api.PortMapping, serverSideConn
 	defer s.connectionLock.Unlock()
 
 	c := &connection{
-		peer:           peer,
-		id:             id.Next(),
-		serverSideConn: serverSideConn,
-		mapping:        m,
+		peer:            peer,
+		id:              id.Next(),
+		serverSideConn:  serverSideConn,
+		mapping:         m,
+		userConnections: map[string]*userConnection{},
 	}
 	s.connections[c.id] = c
 	return c

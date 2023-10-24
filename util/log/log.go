@@ -23,6 +23,26 @@ func Mapping(m *api.PortMapping) slog.Attr {
 	return slog.String("port mapping", portMappingStr)
 }
 
-func UserToClient() slog.Attr {
-	return slog.String("direction", "user -> client")
+func ServerReadFromUser() slog.Attr {
+	return slog.String("direction", "server <- user")
+}
+
+func ServerToClient() slog.Attr {
+	return slog.String("direction", "server -> client")
+}
+
+func ClientReadFromServer() slog.Attr {
+	return slog.String("direction", "client <- server")
+}
+
+func ClientToLocal() slog.Attr {
+	return slog.String("direction", "client -> local")
+}
+
+func ClientReadFromLocal() slog.Attr {
+	return slog.String("direction", "client <- local")
+}
+
+func ClientToServer() slog.Attr {
+	return slog.String("direction", "client -> server")
 }

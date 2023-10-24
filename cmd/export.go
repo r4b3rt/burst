@@ -60,12 +60,15 @@ var (
 				log2.Fatal(fmt.Errorf("not port mapping success"))
 			}
 
-			transformClient, err := c.Transform(context.Background())
-			if err != nil {
-				log2.Fatal(err)
-			}
+			lo.ForEach(successMapping, func(item *api.PortMappingResp, index int) {
+				transformClient, err := c.Transform(context.Background())
+				if err != nil {
+					log2.Fatal(err)
+				}
+				go client.Transform(transformClient, item)
+			})
 
-			client.Transform(transformClient, successMapping)
+			select {}
 		},
 	}
 	portMapping []string

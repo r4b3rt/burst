@@ -33,6 +33,7 @@ func (s *server) Transform(ts api.Burst_TransformServer) error {
 			}
 
 			userConn := conn.addUserConn(c)
+			slog.Info("accept user connect success", log.ConnectionId(conn.id), log.UserConnectionId(userConn.id))
 			go s.transformUserToClient(userConn, ts)
 		}
 	}()
@@ -56,8 +57,8 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream ap
 		// 1. read user conn data
 		n, err := r.Read(buf)
 		if err != nil {
-			slog.Error("read user conn error, stop read",
-				log.UserToClient(),
+			slog.Error("read user data, user to client stop",
+				log.ServerReadFromUser(),
 				log.ConnectionId(userConn.clientConnectionId),
 				log.UserConnectionId(userConn.id),
 				log.Reason(err))
@@ -70,8 +71,8 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream ap
 			UserConnectionId: userConn.id,
 			Data:             buf[:n],
 		}); err != nil {
-			slog.Error("send data to client error, stop send",
-				log.UserToClient(),
+			slog.Error("send data error, user to client stop",
+				log.ServerToClient(),
 				log.ConnectionId(userConn.clientConnectionId),
 				log.UserConnectionId(userConn.id),
 				log.Reason(err))

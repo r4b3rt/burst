@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/internal/cons"
+	"github.com/fzdwx/burst/util/log"
+	"log/slog"
 	"net"
 )
 
@@ -26,6 +28,8 @@ func (s *server) mapping(peer net.Addr, m *api.PortMapping) (string, error) {
 			}
 			c := s.addConnection(peer, m, serverSideConn)
 			m.ServerPort = int64(serverSideConn.(*net.TCPListener).Addr().(*net.TCPAddr).Port)
+
+			slog.Info("success listen tcp", log.ConnectionId(c.id), log.Mapping(c.mapping))
 			doneCh <- c.id
 		default:
 			eCh <- fmt.Errorf("unsupported protocol")
