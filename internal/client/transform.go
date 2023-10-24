@@ -1,10 +1,12 @@
 package client
 
 import (
+	"errors"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/util/jsonutil"
 	"github.com/fzdwx/burst/util/log"
 	"github.com/lxzan/gws"
+	"io"
 	"log/slog"
 )
 
@@ -94,7 +96,6 @@ func (t *t) OnMessage(socket *gws.Conn, message *gws.Message) {
 			log.ConnectionId(t.item.ConnectionId),
 			log.Mapping(t.item.Mapping),
 			log.UserConnectionId(data.UserConnectionId))
-
 	}
 }
 
@@ -103,8 +104,12 @@ func localToServer(userConn *connection, serverStream *gws.Conn) {
 	for {
 		// 5. read local data
 		n, err := userConn.conn.Read(buf)
+		if errors.Is(err, io.EOF) {
+			return
+		}
+
 		if err != nil {
-			slog.Error("read local data, local to server stop",
+			slog.Error("read local data",
 				log.ClientReadFromLocal(),
 				log.ConnectionId(userConn.connectionId),
 				log.Mapping(userConn.mapping),

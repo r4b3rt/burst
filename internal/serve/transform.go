@@ -1,10 +1,12 @@
 package serve
 
 import (
+	"errors"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/util/jsonutil"
 	"github.com/fzdwx/burst/util/log"
 	"github.com/lxzan/gws"
+	"io"
 	"log/slog"
 )
 
@@ -16,8 +18,6 @@ func (q *q) OnOpen(socket *gws.Conn) {
 }
 
 func (q *q) OnClose(socket *gws.Conn, err error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (q *q) OnPing(socket *gws.Conn, payload []byte) {
@@ -41,7 +41,7 @@ func (q *q) OnMessage(socket *gws.Conn, message *gws.Message) {
 		userConn := conn.getUserConn(data.UserConnectionId)
 		if _, err := userConn.conn.Write(data.Data); err != nil {
 			slog.Error("write data error",
-				log.ServerReadFromClient(),
+				log.ServerSendToUser(),
 				log.ConnectionId(conn.id),
 				log.UserConnectionId(data.UserConnectionId),
 				log.Reason(err),
@@ -82,6 +82,10 @@ func (s *server) transformUserToClient(userConn *userConnection, clientStream *g
 	for {
 		// 1. read user conn data
 		n, err := userConn.conn.Read(buf)
+		if errors.Is(err, io.EOF) {
+			// todo remove
+			return
+		}
 		if err != nil {
 			slog.Error("read user data, user to client stop",
 				log.ServerReadFromUser(),
