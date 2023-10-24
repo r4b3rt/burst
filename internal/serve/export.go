@@ -27,14 +27,17 @@ func (s *server) Export(ctx context.Context, request *api.ExportRequest) (*api.E
 
 	for i := range request.PortMapping {
 		mapping := request.PortMapping[i]
-		err := s.mapping(p.Addr, mapping)
+		connectionId, err := s.mapping(p.Addr, mapping)
 		if err != nil {
-			slog.Error("mapping error", slog.String("portMapping", fmt.Sprintf("%d to %d", mapping.ClientPort, mapping.ServerPort)), log.Reason(err))
+			slog.ErrorContext(ctx, "mapping error", log.Mapping(mapping), log.Reason(err))
+		} else {
+			slog.InfoContext(ctx, "mapping success", log.ConnectionId(connectionId))
 		}
 
 		resp.Items = append(resp.Items, &api.PortMappingResp{
-			Mapping: mapping,
-			Error:   errToString(err),
+			Mapping:      mapping,
+			Error:        errToString(err),
+			ConnectionId: connectionId,
 		})
 	}
 

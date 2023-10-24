@@ -18,6 +18,7 @@ message ExportRequest {
 message PortMappingResp {
   PortMapping mapping = 1;
   string error = 2;
+  string connectionId = 3;
 }
 
 message ExportResponse {

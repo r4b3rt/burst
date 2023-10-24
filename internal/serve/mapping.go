@@ -6,13 +6,13 @@ import (
 	"net"
 )
 
-func (s *server) mapping(peer net.Addr, m *api.PortMapping) error {
+func (s *server) mapping(peer net.Addr, m *api.PortMapping) (string, error) {
 	eCh := make(chan error)
-	doneCh := make(chan struct{})
+	doneCh := make(chan string)
 
 	peerTcpAddr, ok := peer.(*net.TCPAddr)
 	if !ok {
-		return fmt.Errorf("peer not tcp addr")
+		return "", fmt.Errorf("peer not tcp addr")
 	}
 
 	go func(peer *net.TCPAddr, m *api.PortMapping) {
@@ -22,15 +22,13 @@ func (s *server) mapping(peer net.Addr, m *api.PortMapping) error {
 			return
 		}
 
-		s.react(peer, m, serverSideConn)
-
-		doneCh <- struct{}{}
+		doneCh <- s.react(peer, m, serverSideConn)
 	}(peerTcpAddr, m)
 
 	select {
-	case <-doneCh:
-		return nil
+	case id := <-doneCh:
+		return id, nil
 	case err := <-eCh:
-		return err
+		return "", err
 	}
 }
