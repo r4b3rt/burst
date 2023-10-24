@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/fzdwx/burst/api"
-	"github.com/fzdwx/burst/internal/log"
+	"github.com/fzdwx/burst/util/log"
 	"google.golang.org/grpc/peer"
 	"log/slog"
 )

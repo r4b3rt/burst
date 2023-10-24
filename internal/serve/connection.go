@@ -2,11 +2,13 @@ package serve
 
 import (
 	"github.com/fzdwx/burst/api"
+	"github.com/fzdwx/burst/util/id"
 	"net"
 )
 
 type connection struct {
 	peer net.Addr
+	id   string
 
 	serverSideConn net.Listener
 	mapping        *api.PortMapping
@@ -16,6 +18,7 @@ func (s *server) react(peer net.Addr, m *api.PortMapping, serverSideConn net.Lis
 	s.connectionLock.Lock()
 	s.connections = append(s.connections, &connection{
 		peer:           peer,
+		id:             id.Next(),
 		serverSideConn: serverSideConn,
 		mapping:        m,
 	})
