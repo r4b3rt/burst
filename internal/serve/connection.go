@@ -8,22 +8,22 @@ import (
 type connection struct {
 	peer net.Addr
 
-	serverConn net.Listener
-	mapping    *api.PortMapping
+	serverSideConn net.Listener
+	mapping        *api.PortMapping
 }
 
-func (s *server) react(peer net.Addr, m *api.PortMapping, conn net.Listener) {
+func (s *server) react(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) {
 	s.connectionLock.Lock()
 	s.connections = append(s.connections, &connection{
-		peer:       peer,
-		serverConn: conn,
-		mapping:    m,
+		peer:           peer,
+		serverSideConn: serverSideConn,
+		mapping:        m,
 	})
 	s.connectionLock.Unlock()
 
-	switch conn.(type) {
+	switch serverSideConn.(type) {
 	case *net.TCPListener:
-		s.reactTCP(peer, m, conn.(*net.TCPListener))
+		s.reactTCP(peer, m, serverSideConn.(*net.TCPListener))
 	}
 }
 

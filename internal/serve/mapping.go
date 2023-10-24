@@ -16,13 +16,13 @@ func (s *server) mapping(peer net.Addr, m *api.PortMapping) error {
 	}
 
 	go func(peer *net.TCPAddr, m *api.PortMapping) {
-		serverConn, err := net.Listen("tcp", fmt.Sprintf(":%d", m.ServerPort))
+		serverSideConn, err := net.Listen("tcp", fmt.Sprintf(":%d", m.ServerPort))
 		if err != nil {
 			eCh <- err
 			return
 		}
 
-		s.react(peer, m, serverConn)
+		s.react(peer, m, serverSideConn)
 
 		doneCh <- struct{}{}
 	}(peerTcpAddr, m)
