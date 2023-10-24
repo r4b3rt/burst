@@ -103,7 +103,7 @@ func localToServer(userConn *connection, serverStream *gws.Conn) {
 	for {
 		// 5. read local data
 		n, err := userConn.conn.Read(buf)
-		if err != nil && err.Error() != "EOF" {
+		if err != nil {
 			slog.Error("read local data, local to server stop",
 				log.ClientReadFromLocal(),
 				log.ConnectionId(userConn.connectionId),

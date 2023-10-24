@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/util/jsonutil"
 	"io"
@@ -27,11 +28,6 @@ func (c client) Export(a *api.ExportRequest) (*api.ExportResponse, error) {
 }
 
 func New(address string) (*client, error) {
-	url := address
-	if strings.HasPrefix(address, ":") {
-		url = "http://localhost" + address
-	}
-
-	c := &client{url}
+	c := &client{fmt.Sprintf("http://%s/export", address)}
 	return c, nil
 }

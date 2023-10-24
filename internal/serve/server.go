@@ -41,13 +41,12 @@ func (s *server) ListenAndServe() error {
 			return
 		}
 		go func() {
-			// Blocking prevents the context from being GC.
 			socket.ReadLoop()
 		}()
 	})
 
 	engine.POST("/export", func(context *gin.Context) {
-		var req *api.ExportRequest
+		var req = &api.ExportRequest{}
 		if err := context.ShouldBindJSON(req); err != nil {
 			context.JSON(400, gin.H{
 				"error": err.Error(),
@@ -55,7 +54,13 @@ func (s *server) ListenAndServe() error {
 			return
 		}
 
-		resp := s.Export(context, req)
+		resp, err := s.Export(context, req)
+		if err != nil {
+			context.JSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
 		context.JSON(200, resp)
 	})
 

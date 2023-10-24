@@ -26,6 +26,9 @@ var (
 		Example: `burst export :8000 -p 8888:18888 -p 9999:19999`,
 		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
+			if strings.HasPrefix(args[0], ":") {
+				args[0] = "localhost" + args[0]
+			}
 			c, err := client.New(args[0])
 			if err != nil {
 				log2.Fatal(err)
@@ -43,7 +46,7 @@ var (
 				log2.Fatal(err)
 			}
 
-			items := resp.GetItems()
+			items := resp.Items
 			if items == nil || len(items) == 0 {
 				log2.Fatal(fmt.Errorf("not port mapping success"))
 			}
@@ -60,12 +63,7 @@ var (
 				log2.Fatal(fmt.Errorf("not port mapping success"))
 			}
 
-			serverAddressPairs := strings.Split(args[0], ":")
-			address := "localhost"
-			if len(serverAddressPairs[0]) > 0 {
-				address = serverAddressPairs[0]
-			}
-			addr := fmt.Sprintf("ws://%s:%d", address, resp.ServerWsPort)
+			addr := fmt.Sprintf("ws://%s/ws", args[0])
 			lo.ForEach(successMapping, func(item *api.PortMappingResp, index int) {
 				ws, _, err := gws.NewClient(client.NewTransform(item), &gws.ClientOption{
 					Addr: addr,

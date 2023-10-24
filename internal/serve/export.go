@@ -16,8 +16,7 @@ func (s *server) Export(ctx *gin.Context, request *api.ExportRequest) (*api.Expo
 
 	var (
 		resp = &api.ExportResponse{
-			Items:        make([]*api.PortMappingResp, 0),
-			ServerWsPort: s.wsPort,
+			Items: make([]*api.PortMappingResp, 0),
 		}
 	)
 
