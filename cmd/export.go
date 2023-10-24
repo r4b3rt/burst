@@ -2,10 +2,14 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/fzdwx/burst/api"
 	"github.com/fzdwx/burst/internal/client"
+	"github.com/fzdwx/burst/util/log"
+	"github.com/samber/lo"
 	"github.com/spf13/cobra"
+	log2 "log"
 	"log/slog"
 	"strconv"
 	"strings"
@@ -21,28 +25,47 @@ var (
 		Short:   "Export client port to server port",
 		Example: `burst export :8000 -p 8888:18888 -p 9999:19999`,
 		Args:    cobra.MinimumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			c, err := client.Dial(args[0])
 			if err != nil {
-				return err
+				log2.Fatal(err)
 			}
 
 			mapping, err := validatePortMapping(portMapping)
 			if err != nil {
-				return err
+				log2.Fatal(err)
 			}
+
 			resp, err := c.Export(context.Background(), &api.ExportRequest{
 				PortMapping: mapping,
 			})
-
 			if err != nil {
-				return err
+				log2.Fatal(err)
 			}
 
-			fmt.Println(resp)
+			items := resp.GetItems()
+			if items == nil || len(items) == 0 {
+				log2.Fatal(fmt.Errorf("not port mapping success"))
+			}
 
-			return nil
+			successMapping := lo.Filter(items, func(item *api.PortMappingResp, index int) bool {
+				ok := item.Error == ""
+				if ok == false {
+					slog.Error("mapping error", log.Mapping(item.Mapping), log.Reason(errors.New(item.Error)))
+				}
+				return ok
+			})
 
+			if successMapping == nil || len(successMapping) == 0 {
+				log2.Fatal(fmt.Errorf("not port mapping success"))
+			}
+
+			transformClient, err := c.Transform(context.Background())
+			if err != nil {
+				log2.Fatal(err)
+			}
+
+			client.Transform(transformClient, successMapping)
 		},
 	}
 	portMapping []string
@@ -70,7 +93,9 @@ func validatePortMapping(portMapping []string) ([]*api.PortMapping, error) {
 }
 
 func parse(ports []string) *api.PortMapping {
-	var m = &api.PortMapping{}
+	var m = &api.PortMapping{
+		Protocol: "tcp", // todo
+	}
 	m.ClientPort, _ = strconv.ParseInt(ports[0], 10, 64)
 
 	if len(ports) == 1 {

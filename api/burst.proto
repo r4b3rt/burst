@@ -3,11 +3,14 @@ option go_package = "github.com/fzdwx/burst/api";
 
 service burst{
   rpc Export(ExportRequest) returns (ExportResponse);
+
+  rpc Transform(stream TransFromData) returns(stream TransFromData);
 }
 
 message PortMapping {
   int64 clientPort = 1;
   int64 serverPort = 2;
+  string protocol = 3;
 }
 
 message ExportRequest {
@@ -23,4 +26,8 @@ message PortMappingResp {
 
 message ExportResponse {
   repeated PortMappingResp items = 1;
+}
+
+message TransFromData{
+  string connectionId = 1;
 }

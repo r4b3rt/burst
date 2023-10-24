@@ -15,15 +15,7 @@ type connection struct {
 }
 
 func (s *server) react(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) string {
-	s.connectionLock.Lock()
-	c := &connection{
-		peer:           peer,
-		id:             id.Next(),
-		serverSideConn: serverSideConn,
-		mapping:        m,
-	}
-	s.connections = append(s.connections, c)
-	s.connectionLock.Unlock()
+	c := s.addConnection(peer, m, serverSideConn)
 
 	switch serverSideConn.(type) {
 	case *net.TCPListener:
@@ -37,4 +29,25 @@ func (s *server) reactTCP(peer net.Addr, m *api.PortMapping, conn *net.TCPListen
 	m.ServerPort = int64(conn.Addr().(*net.TCPAddr).Port)
 
 	// todo react
+}
+
+func (s *server) addConnection(peer net.Addr, m *api.PortMapping, serverSideConn net.Listener) *connection {
+	s.connectionLock.Lock()
+	defer s.connectionLock.Unlock()
+
+	c := &connection{
+		peer:           peer,
+		id:             id.Next(),
+		serverSideConn: serverSideConn,
+		mapping:        m,
+	}
+	s.connections[c.id] = c
+	return c
+}
+
+func (s *server) getConnection(id string) *connection {
+	s.connectionLock.RLock()
+	defer s.connectionLock.RUnlock()
+
+	return s.connections[id]
 }

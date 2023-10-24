@@ -19,11 +19,14 @@ type server struct {
 
 	port           int
 	connectionLock sync.RWMutex
-	connections    []*connection
+	connections    map[string]*connection
 }
 
 func newServer(port int) *server {
-	return &server{port: port}
+	return &server{
+		port:        port,
+		connections: map[string]*connection{},
+	}
 }
 
 func (s *server) ListenAndServe() error {

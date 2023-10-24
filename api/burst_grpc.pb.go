@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Burst_Export_FullMethodName = "/burst/Export"
+	Burst_Export_FullMethodName    = "/burst/Export"
+	Burst_Transform_FullMethodName = "/burst/Transform"
 )
 
 // BurstClient is the client API for Burst service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BurstClient interface {
 	Export(ctx context.Context, in *ExportRequest, opts ...grpc.CallOption) (*ExportResponse, error)
+	Transform(ctx context.Context, opts ...grpc.CallOption) (Burst_TransformClient, error)
 }
 
 type burstClient struct {
@@ -46,11 +48,43 @@ func (c *burstClient) Export(ctx context.Context, in *ExportRequest, opts ...grp
 	return out, nil
 }
 
+func (c *burstClient) Transform(ctx context.Context, opts ...grpc.CallOption) (Burst_TransformClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Burst_ServiceDesc.Streams[0], Burst_Transform_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &burstTransformClient{stream}
+	return x, nil
+}
+
+type Burst_TransformClient interface {
+	Send(*TransFromData) error
+	Recv() (*TransFromData, error)
+	grpc.ClientStream
+}
+
+type burstTransformClient struct {
+	grpc.ClientStream
+}
+
+func (x *burstTransformClient) Send(m *TransFromData) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *burstTransformClient) Recv() (*TransFromData, error) {
+	m := new(TransFromData)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // BurstServer is the server API for Burst service.
 // All implementations must embed UnimplementedBurstServer
 // for forward compatibility
 type BurstServer interface {
 	Export(context.Context, *ExportRequest) (*ExportResponse, error)
+	Transform(Burst_TransformServer) error
 	mustEmbedUnimplementedBurstServer()
 }
 
@@ -60,6 +94,9 @@ type UnimplementedBurstServer struct {
 
 func (UnimplementedBurstServer) Export(context.Context, *ExportRequest) (*ExportResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Export not implemented")
+}
+func (UnimplementedBurstServer) Transform(Burst_TransformServer) error {
+	return status.Errorf(codes.Unimplemented, "method Transform not implemented")
 }
 func (UnimplementedBurstServer) mustEmbedUnimplementedBurstServer() {}
 
@@ -92,6 +129,32 @@ func _Burst_Export_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Burst_Transform_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(BurstServer).Transform(&burstTransformServer{stream})
+}
+
+type Burst_TransformServer interface {
+	Send(*TransFromData) error
+	Recv() (*TransFromData, error)
+	grpc.ServerStream
+}
+
+type burstTransformServer struct {
+	grpc.ServerStream
+}
+
+func (x *burstTransformServer) Send(m *TransFromData) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *burstTransformServer) Recv() (*TransFromData, error) {
+	m := new(TransFromData)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Burst_ServiceDesc is the grpc.ServiceDesc for Burst service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -104,6 +167,13 @@ var Burst_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Burst_Export_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Transform",
+			Handler:       _Burst_Transform_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "api/burst.proto",
 }
